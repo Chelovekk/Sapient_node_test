@@ -10,19 +10,16 @@ class userController{
                 console.log(errors)
                 throw "validation"
             }
-            let data = fs.readFileSync('./db/users.json', 'utf-8')
-
-            let obj = JSON.parse(data)
-            obj.push(req.body)
-            let newData = JSON.stringify(obj);
+            fs.promises.readFile('./db/users.json', 'utf-8')
+            .then(result=>{
+                result = JSON.parse(result)
+                result.push(req.body);
+                fs.promises.writeFile('./db/users.json', JSON.stringify(result))
+            })
+            .catch(err=>console.log(err))
             
 
-            fs.writeFile('./db/users.json', newData, (err)=>{
-                if (err){
-                    throw err
-                }
-                return
-            })
+            
             res.send('good');
         } catch(e){
             res.send(e)
@@ -30,35 +27,43 @@ class userController{
     }
     readUser(req,res){
         try {
+            const errors = validationResult(req);
+            if(errors.errors.length){
+                console.log(errors)
+                throw "validation"
+            }
             const id = req.params.userId;
             console.log(id);
-            let data = fs.readFileSync('./db/users.json', 'utf-8')
-            let obj = JSON.parse(data)
-            let user = obj.find(el=> el.id==req.params.userId)
-            res.send(user)
+            fs.promises.readFile('./db/users.json', 'utf-8')
+            .then(result=>{
+                result = JSON.parse(result)
+                let user = result.find(el=> el.id==req.params.userId)
+                res.send(user)
+            })
+            
+            
         } catch (error) {
             res.send('smth bad')
         }
     }
     updateUser(req,res){
         try {
-            console.log(req.body["id"])
 
-            let data = fs.readFileSync('./db/users.json', 'utf-8')
+            let data = fs.promises.readFile('./db/users.json', 'utf-8')
+            .then(result=>{
+                result = JSON.parse(result)
 
-            let obj = JSON.parse(data)
-            obj.forEach((el, index, array)=>{
-                if(el.id==req.body.id){
-                    array[index][req.body.field] = req.body.newData;
-                }
+                result.forEach((el, index, array)=>{
+                    if(el.id==req.body.id){
+                        array[index][req.body.field] = req.body.newData;
+                    }
+                })
+                
+                fs.promises.writeFile('./db/users.json', JSON.stringify(result))
+                 .catch(err=>console.log(err))
+
             })
-            fs.writeFile('./db/users.json', JSON.stringify(obj), (err)=>{
-                if (err){
-                    throw err
-                }
-                return
-            })
-
+            .catch(err=>console.log(err))
             res.send(200)
         } catch (error) {
             res.send("smth bad")
@@ -70,17 +75,13 @@ class userController{
         console.log(errors)
         const {data} = req.body;
 
-        let jsonData = fs.readFileSync('./db/users.json', 'utf-8')
-        let obj = JSON.parse(jsonData)
-        obj = obj.filter(el=>el.id!=req.body.id)
-        
-        let newData = JSON.stringify(obj)
-        fs.writeFile('./db/users.json', newData, (err)=>{
-            if (err){
-                throw err
-            }
-            return
+        let jsonData = fs.promises.readFile('./db/users.json', 'utf-8')
+        .then(result=>{
+            result = JSON.parse(result)
+            result = result.filter(el=>el.id!=req.body.id)
+            fs.promises.writeFile('./db/users.json', JSON.stringify(result))
         })
+        
         res.send('good')
         } catch (e) {
             res.send('bad')
