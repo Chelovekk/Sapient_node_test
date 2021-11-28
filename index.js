@@ -14,4 +14,4 @@ app.use('/api', adressRouter);
 app.use('/api', userRouter);
 
 
-app.listen(3000, ()=> console.log(`started on ...`));
+app.listen(3000, ()=> console.log(`started`));

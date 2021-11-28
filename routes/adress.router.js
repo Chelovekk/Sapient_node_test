@@ -1,7 +1,7 @@
 const{Router} = require('express')
 const router = Router()
 const adressController = require('../controllers/adress.controller')
-const validator = require("../addressValidator");
+const validator = require("../validators/addressValidator");
 
 router.post('/addressadd', validator.createAddress, adressController.createAdress);
 router.get('/addressread/:addressId', adressController.readAdress);
