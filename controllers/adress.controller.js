@@ -2,21 +2,18 @@ const { validationResult } = require("express-validator");
 const fs = require('fs');
 
 class adressController{
-    createAdress(req,res){
+    async createAdress(req,res){
         try{
             const errors = validationResult(req);
             if(errors.errors.length){
                 console.log(errors)
                 throw "validation"
             }
-            fs.promises.readFile('./db/addresses.json', 'utf-8')
-            .then(result=>{
-                result = JSON.parse(result)
-                result.push(req.body)
-                fs.promises.writeFile('./db/addresses.json', JSON.stringify(result))
-                .catch(err=>{console.log(err)})
-            })
-            .catch(err=>{console.log(err)})
+            const fileData = await fs.promises.readFile('./db/addresses.json', 'utf-8');
+            fileData = JSON.parse(fileData);
+            fileData.push(req.body);
+            await fs.promises.writeFile('./db/addresses.json', JSON.stringify(fileData));
+            
             
             res.send('good');
         } catch(e){

@@ -3,84 +3,71 @@ const fs = require('fs');
 const path = require('path');
 
 class userController{
-     createUser(req,res){
+     async createUser(req,res){
         try{
             const errors = validationResult(req);
             if(errors.errors.length){
                 console.log(errors)
                 throw "validation"
-            }
-            fs.promises.readFile('./db/users.json', 'utf-8')
-            .then(result=>{
-                result = JSON.parse(result)
-                result.push(req.body);
-                fs.promises.writeFile('./db/users.json', JSON.stringify(result))
-            })
-            .catch(err=>console.log(err))
+            }   
+            const dbData = await JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
+
+            dbData.users.push(req.body);
+            dbData.users[dbData.users.length-1].id = ++dbData.counter;
+
+            await fs.promises.writeFile('./db/users.json', JSON.stringify(dbData));
             
 
             
             res.send('good');
         } catch(e){
-            res.send(e)
+            res.send('smth bad')
         }
     }
-    readUser(req,res){
+    async readUser(req,res){
         try {
             const errors = validationResult(req);
             if(errors.errors.length){
                 console.log(errors)
                 throw "validation"
             }
-            const id = req.params.userId;
-            console.log(id);
-            fs.promises.readFile('./db/users.json', 'utf-8')
-            .then(result=>{
-                result = JSON.parse(result)
-                let user = result.find(el=> el.id==req.params.userId)
-                res.send(user)
-            })
-            
+            const dbData = await JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
+            const user = dbData.users.find(el => el.id == req.params.userId);
+            res.send(user)
             
         } catch (error) {
             res.send('smth bad')
         }
     }
-    updateUser(req,res){
+    async updateUser(req,res){
         try {
-
-            let data = fs.promises.readFile('./db/users.json', 'utf-8')
-            .then(result=>{
-                result = JSON.parse(result)
-
-                result.forEach((el, index, array)=>{
-                    if(el.id==req.body.id){
-                        array[index][req.body.field] = req.body.newData;
-                    }
-                })
-                
-                fs.promises.writeFile('./db/users.json', JSON.stringify(result))
-                 .catch(err=>console.log(err))
-
-            })
-            .catch(err=>console.log(err))
+            const errors = validationResult(req);
+            if(errors.errors.length){
+                console.log(errors)
+                throw "validation"
+            }  
+            const dbData = await JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
+            console.log(dbData.users);
+          for(let user of dbData.users){
+              if(user.id == req.body.id){
+                user[req.body.fieldName] = req.body.newData;
+              }
+          }
+          
+          await fs.promises.writeFile('./db/users.json', JSON.stringify(dbData))
             res.send(200)
         } catch (error) {
             res.send("smth bad")
         }
     }
-    deleteUser(req,res){
+    async deleteUser(req,res){
         try {
-        const errors = validationResult(req);
-        console.log(errors)
-        const {data} = req.body;
-
-        let jsonData = fs.promises.readFile('./db/users.json', 'utf-8')
-        .then(result=>{
-            result = JSON.parse(result)
-            result = result.filter(el=>el.id!=req.body.id)
-            fs.promises.writeFile('./db/users.json', JSON.stringify(result))
-        })
+    
+        const dbData = JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
+        
+        dbData.users = dbData.users.filter(el=>el.id!=req.body.id);
+        await fs.promises.writeFile('./db/users.json', JSON.stringify(dbData))
+         
         
         res.send('good')
         } catch (e) {
