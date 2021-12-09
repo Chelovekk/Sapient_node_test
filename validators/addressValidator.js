@@ -1,9 +1,6 @@
 const { check } = require('express-validator/check');
 
 exports.createAddress = [
-    check('id').notEmpty().custom(value=>{
-        return !isNaN(value);
-    }),
     check('user_id').notEmpty().custom(value=>{
         return !isNaN(value);
     }),

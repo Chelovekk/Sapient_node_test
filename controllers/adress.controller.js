@@ -9,81 +9,70 @@ class adressController{
                 console.log(errors)
                 throw "validation"
             }
-            const fileData = await fs.promises.readFile('./db/addresses.json', 'utf-8');
-            fileData = JSON.parse(fileData);
-            fileData.push(req.body);
-            await fs.promises.writeFile('./db/addresses.json', JSON.stringify(fileData));
+            
+            const dbData = JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
+
+            dbData.addresses.push(req.body)
+            dbData.addresses[dbData.addresses.length-1].id = ++dbData.counter;
+            await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData));
             
             
             res.send('good');
         } catch(e){
-            res.send('smth wrong')
+            console.log(e)
+            res.send(e)
         }
     }
-    readAdress(req,res){
+    async readAdress(req,res){
         try {
             const errors = validationResult(req);
             if(errors.errors.length){
                 console.log(errors)
                 throw "validation"
             }
-            fs.promises.readFile('./db/addresses.json', 'utf-8')
-            .then(result=>{
-                result = JSON.parse(result)
-                result = result.find(el=> el.id==req.params.addressId)
-                res.send(result)
-            })
-            .catch(err=>{console.log(err)})
-        
+            const dbData = await JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
+            const address = dbData.addresses.find(el => el.id == req.params.addressId);
+            res.send(address)
         } catch (error) {
+            console.log(error)
             res.send('smth bad')
         }
     }
-    updateAdress(req,res){
+    async updateAdress(req,res){
         try { 
             const errors = validationResult(req);
             if(errors.errors.length){
                 throw "validation"
             }
 
-
-            fs.promises.readFile('./db/addresses.json', 'utf-8')
-            .then(result=>{
-                result = JSON.parse(result)
-                result.forEach((el, index,array)=>{
-                    if(el.id==req.body.id){
-                        array[index][req.body.field] = req.body.newData;
-                    }
-                })
-                fs.promises.writeFile('./db/addresses.json', JSON.stringify(result))
-                .catch(err=>{console.log(err)})
-            })
-            .catch(err=>{console.log(err)})
-            
+            const dbData = await JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
+          for(let address of dbData.addresses){
+              if(address.id == req.body.id){
+                address[req.body.fieldName] = req.body.newData;
+              }
+          }
+          
+          await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData))            
 
             res.send(200)
         } catch (error) {
             res.send(error)
         }
     }
-    deleteAdress(req,res){
+    async deleteAdress(req,res){
         try {
             const errors = validationResult(req);
             if(errors.errors.length){
                 throw "validation"
             }    
-             fs.promises.readFile('./db/addresses.json', 'utf-8')
-             .then(result=>{
-                result = JSON.parse(result)
-                result = result.filter(el=>el.id!=req.body.id)
-                fs.promises.writeFile('./db/addresses.json',  JSON.stringify(result))
-               .catch(err=>{console.log(err)})
-
-             })
-             .catch(err=>{console.log(err)})
+            const dbData = JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
+        
+            dbData.addresses = dbData.addresses.filter(el=>el.id!=req.body.id);
+            await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData))
            
             res.send('good')
         } catch (e) {
+            console.log(e)
                 res.send('bad')
         }  
     }
