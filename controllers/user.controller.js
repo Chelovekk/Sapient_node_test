@@ -63,10 +63,13 @@ class userController{
     async deleteUser(req,res){
         try {
     
-        const dbData = JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
-        
-        dbData.users = dbData.users.filter(el=>el.id!=req.body.id);
-        await fs.promises.writeFile('./db/users.json', JSON.stringify(dbData))
+        const dbUsersData = JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
+        const dbAddressesData = JSON.parse(await fs.promises.readFile('./db/address.json', 'utf-8'));
+
+        dbUsersData.users = dbUsersData.users.filter(el=>el.id!=req.body.id);
+        dbAddressesData.addresses = dbAddressesData.addresses.filter(el=>el.user_id!=req.body.id)
+
+        await fs.promises.writeFile('./db/users.json', JSON.stringify(dbUsersData))
          
         
         res.send('good')
