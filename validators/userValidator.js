@@ -25,10 +25,10 @@ exports.deleteUser = [
 exports.updateUser = [
     check('id').notEmpty().isNumeric(),
     oneOf([
-        check('fieldname').equals('lastname'),
+        check('fieldName').equals('lastname'),
         check('fieldName').equals('firstname'),
-        check('fieldname').equals('phoneNumber'),
-        check('fieldname').equals('birthday'),
+        check('fieldName').equals('phoneNumber'),
+        check('fieldName').equals('birthday'),
     ]),
     check('newData').notEmpty(),
 ]
