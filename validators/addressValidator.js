@@ -1,51 +1,24 @@
-const { check } = require('express-validator/check');
+const   { check } = require('express-validator/check');
+const { matchedData } = require('express-validator');
 
 exports.createAddress = [
-    check('user_id').notEmpty().custom(value=>{
-        return !isNaN(value);
-    }),
-    check('country').notEmpty().custom(value=>{
-        let isnum = /\d/.test(value);
-        if(isnum){
-                return 0
-            }
-
-            return 1
-    }),
-    check('state').notEmpty().custom(value=>{
-        let isnum = /\d/.test(value);
-        if(isnum){
-                return 0
-            }
-
-            return 1
-    }),
-    check('city').notEmpty().custom(value=>{
-        let isnum = /\d/.test(value);
-        if(isnum){
-                return 0
-            }
-
-            return 1
-    }),
-    check('address').notEmpty().isString(),
-    check('zipCode').custom(value=>{
-        if(!/\d{5}/.test(value)){
-            return false;
-        } else{
-            return true
-        }
-
-    })
-
-];
+    check('user_id').notEmpty().isNumeric().exists(),
+    check('country').notEmpty().matches(/^[aA-zZ]+$/).exists(),
+    check('state').notEmpty().matches(/^[aA-zZ]+$/).exists(),
+    check('city').notEmpty().matches(/^[aA-zZ]+$/).exists(),
+    check('address').notEmpty().isString().exists(),
+    check('zipCode').matches(/\b\d{5}\b/g).exists(),
+    (req,res,next) => {
+        req.body = matchedData(req,{includeOptionals:false});
+        next()
+    }
+]; 
 exports.deleteAddress = [
-    check('id').notEmpty().custom(value=>{
-        return !isNaN(value);
-    })
+    check('id').notEmpty().isNumeric()
 ]
 exports.updateAddress = [
-    check('id').notEmpty().custom(value=>{
-        return !isNaN(value);
-    })
+    check('id').notEmpty().isNumeric(),
+    check('fieldName').notEmpty().equals('country'||'state'||'city'||'address'||'zipCode'),
+    check('newData').notEmpty(),
+
 ]

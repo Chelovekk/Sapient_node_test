@@ -9,18 +9,19 @@ class userController{
             if(errors.errors.length){
                 console.log(errors)
                 throw "validation"
+            //     res.status(500).send(errors)
             }   
             const dbData = await JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
 
             dbData.users.push(req.body);
             dbData.users[dbData.users.length-1].id = ++dbData.counter;
+            dbData.users[dbData.users.length-1].createAt = new Date();
 
             await fs.promises.writeFile('./db/users.json', JSON.stringify(dbData));
             
-
-            
             res.send('good');
         } catch(e){
+            console.log(e);
             res.send('smth bad')
         }
     }
@@ -43,14 +44,14 @@ class userController{
         try {
             const errors = validationResult(req);
             if(errors.errors.length){
-                console.log(errors)
+                console.log(errors.errors)
                 throw "validation"
             }  
-            const dbData = await JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
-            console.log(dbData.users);
+                const dbData = await JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
           for(let user of dbData.users){
               if(user.id == req.body.id){
                 user[req.body.fieldName] = req.body.newData;
+                user.updatedAt = new Date();
               }
           }
           

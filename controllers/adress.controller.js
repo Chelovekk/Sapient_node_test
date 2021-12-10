@@ -16,7 +16,6 @@ class adressController{
             dbData.addresses[dbData.addresses.length-1].id = ++dbData.counter;
             await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData));
             
-            
             res.send('good');
         } catch(e){
             console.log(e)
@@ -42,6 +41,7 @@ class adressController{
         try { 
             const errors = validationResult(req);
             if(errors.errors.length){
+                console.log(errors)
                 throw "validation"
             }
 
