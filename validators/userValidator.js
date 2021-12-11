@@ -1,18 +1,10 @@
-const { matchedData, oneOf } = require('express-validator');
-const { check } = require('express-validator/check');
+const { matchedData, oneOf, check } = require('express-validator');
 
 exports.createUser = [
     check('firstname').notEmpty().isString(),
     check('lastname').notEmpty().isString(),
     check('phoneNumber').notEmpty().isNumeric(),
-    check('birthday').custom(value=>{
-        if(!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value)){
-            return false;
-        } else{
-            return true
-        }
-
-    }),
+    check('birthday').matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/),
     (req,res,next)=>{
         req.body = matchedData(req,{includeOptionals:false})
         next();
