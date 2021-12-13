@@ -12,9 +12,7 @@ exports.createAddress = [
         next()
     }
 ]; 
-exports.deleteAddress = [
-    check('id').notEmpty().isNumeric()
-]
+
 exports.updateAddress = [
     check('id').notEmpty().withMessage("not empty").isNumeric().withMessage("isNumeric"),
     oneOf([

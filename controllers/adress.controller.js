@@ -13,15 +13,21 @@ class adressController{
             }
             
             const dbData = JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
+            const dbUsersData = JSON.parse(await fs.promises.readFile('./db/users.json', 'utf-8'));
+
+            if(!dbUsersData.users.find(el=>el.id==req.body.user_id)){
+                res.status(500);
+                throw "User not find"
+            }
 
             dbData.addresses.push(req.body)
             dbData.addresses[dbData.addresses.length-1].id = ++dbData.counter;
             dbData.addresses[dbData.addresses.length-1].createdAt = new Date();
+            dbData.addresses[dbData.addresses.length-1].updatedAt = new Date();
             await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData));
             
             res.send('good');
         } catch(e){
-            console.log(e)
             res.json({error:e})
         }
     }
@@ -52,22 +58,29 @@ class adressController{
             }
 
             const dbData = await JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
-            if(!dbData.addresses.find(el=>el.id==req.body.id)){
+
+            let addressUpdating = dbData.addresses.find(el=>el.id==req.body.id)
+            if(!addressUpdating){
                 res.status(500)
-                throw "address not found"
+                throw "Address not found"
+            } else{
+                let index = dbData.addresses.indexOf(addressUpdating)
+                dbData.addresses[index][req.body.fieldName] = req.body.newData;
+                dbData.addresses[index].updatedAt = new Date();
             }
 
-            for(let address of dbData.addresses){
-                if(address.id == req.body.id){
-                    address[req.body.fieldName] = req.body.newData;
-                    address.updatedAt = new Date();
-                }
-            }
+            // for(let address of dbData.addresses){
+            //     if(address.id == req.body.id){
+            //         address[req.body.fieldName] = req.body.newData;
+            //         address.updatedAt = new Date();
+            //     }
+            // }
           
           await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData))            
 
             res.send(200)
         } catch (e) {
+            console.log(e)
             res.json({error:e})
         }
     }
@@ -80,14 +93,18 @@ class adressController{
                 res.status(500)
                 throw errors.array({onlyFirstError:true})
             }   
-
+            
             const dbData = JSON.parse(await fs.promises.readFile('./db/addresses.json', 'utf-8'));
-            if(!dbData.addresses.find(el=>el.id==req.body.id)){
+
+            let addressIndex = dbData.addresses.findIndex(el=>el.id==req.params.addressId);
+            
+            if(addressIndex === -1){
                 res.status(500)
                 throw "Address not found"
+            }else{
+                dbData.addresses.splice(addressIndex,1); 
             }
 
-            dbData.addresses = dbData.addresses.filter(el=>el.id!=req.body.id);
             await fs.promises.writeFile('./db/addresses.json', JSON.stringify(dbData))
             res.send('good')
         } catch (e) {
